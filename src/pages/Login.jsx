@@ -17,37 +17,42 @@ const LoginPage = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError(null);
 
-    try {
-      const response = await fetch('https://offers-api.digistos.com/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json'
-        },
-        body: JSON.stringify(formData),
-      });
+  try {
+    const response = await fetch('https://offers-api.digistos.com/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify(formData),
+    });
 
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error("Identifiants invalides. Veuillez réessayer.");
-        } else {
-          throw new Error("Une erreur est survenue.");
-        }
-      }
+    const data = await response.json();
 
-      const data = await response.json();
-      console.log('Connexion réussie:', data);
-
-      navigate('/offres/professionnelles');
-    } catch (err) {
-      console.error("Erreur lors de la connexion :", err.message);
-      setError(err.message);
+    if (!response.ok) {
+      throw {
+        status: response.status,
+        message: data.message || 'Erreur lors de la connexion'
+      };
     }
-  };
+
+    console.log('Connexion réussie:', data);
+    navigate('/offres/professionnelles');
+
+  } catch (err) {
+    console.error("Erreur lors de la connexion :", err.message || err);
+
+    if (err.status === 401) {
+      setError("Identifiants invalides. Veuillez réessayer.");
+    } else {
+      setError("Une erreur est survenue. Veuillez réessayer plus tard.");
+    }
+  }
+};
 
   return (
     <Container className="d-flex justify-content-center align-items-center min-vh-100">
