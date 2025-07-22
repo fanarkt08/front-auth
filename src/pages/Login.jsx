@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Form, Button, Container, Card, Row, Col } from "react-bootstrap";
+import { useNavigate } from 'react-router';
+import { Form, Button, Container, Card, Row, Col, Alert } from "react-bootstrap";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -14,14 +17,36 @@ const LoginPage = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    // Don't forget to handle errors, both for yourself (dev) and for the client (via a Bootstrap Alert):
-    //   - Show an error if credentials are invalid
-    //   - Show a generic error for all other cases
-    // On success, redirect to the Pro Offers page
-    console.log("Login submitted:", formData);
+    setError(null);
+
+    try {
+      const response = await fetch('https://offers-api.digistos.com/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Identifiants invalides. Veuillez réessayer.");
+        } else {
+          throw new Error("Une erreur est survenue.");
+        }
+      }
+
+      const data = await response.json();
+      console.log('Connexion réussie:', data);
+
+      navigate('/offres/professionnelles');
+    } catch (err) {
+      console.error("Erreur lors de la connexion :", err.message);
+      setError(err.message);
+    }
   };
 
   return (
@@ -30,6 +55,7 @@ const LoginPage = () => {
         <Col xs={12} sm={8} md={6} lg={4}>
           <Card className="p-4 shadow-lg">
             <h1 className="text-center mb-4">Se connecter</h1>
+            {error && <Alert variant="danger">{error}</Alert>}
             <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-3" controlId="loginEmail">
                 <Form.Label>Email</Form.Label>
