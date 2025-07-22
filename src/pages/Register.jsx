@@ -30,14 +30,12 @@ const Register = () => {
         },
         body: JSON.stringify(formData),
       });
-
+      const data = await response.json();
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Erreur lors de l’inscription');
+        throw new Error(data.message || 'Erreur lors de l’inscription');
       }
 
-      const data = await response.json();
       console.log('Inscription réussie:', data);
 
       navigate('/connexion');
