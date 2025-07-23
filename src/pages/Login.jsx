@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from 'react-router';
 import { Form, Button, Container, Card, Row, Col, Alert } from "react-bootstrap";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../store/authSlice"; // adapte le chemin si nécessaire
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +11,7 @@ const LoginPage = () => {
   });
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleChange = (e) => {
     setFormData({
@@ -17,42 +20,48 @@ const LoginPage = () => {
     });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError(null);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
 
-  try {
-    const response = await fetch('https://offers-api.digistos.com/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json'
-      },
-      body: JSON.stringify(formData),
-    });
+    try {
+      const response = await fetch('https://offers-api.digistos.com/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json'
+        },
+        body: JSON.stringify(formData),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      throw {
-        status: response.status,
-        message: data.message || 'Erreur lors de la connexion'
-      };
+      if (!response.ok) {
+        throw {
+          status: response.status,
+          message: data.message || 'Erreur lors de la connexion'
+        };
+      }
+
+      dispatch(
+        loginSuccess({
+          token: data.access_token,
+          expiresAt: new Date(Date.now() + data.expires_in * 1000).toISOString(),
+        })
+      );
+
+      navigate('/offres/professionnelles');
+
+    } catch (err) {
+      console.error("Erreur lors de la connexion :", err.message || err);
+
+      if (err.status === 401) {
+        setError("Identifiants invalides. Veuillez réessayer.");
+      } else {
+        setError("Une erreur est survenue. Veuillez réessayer plus tard.");
+      }
     }
-
-    console.log('Connexion réussie:', data);
-    navigate('/offres/professionnelles');
-
-  } catch (err) {
-    console.error("Erreur lors de la connexion :", err.message || err);
-
-    if (err.status === 401) {
-      setError("Identifiants invalides. Veuillez réessayer.");
-    } else {
-      setError("Une erreur est survenue. Veuillez réessayer plus tard.");
-    }
-  }
-};
+  };
 
   return (
     <Container className="d-flex justify-content-center align-items-center min-vh-100">

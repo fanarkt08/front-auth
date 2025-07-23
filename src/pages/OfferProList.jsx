@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { Spinner, Alert } from "react-bootstrap";
 import OfferList from "../components/OfferList.jsx";
 
@@ -6,6 +7,8 @@ const OfferProList = () => {
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const token = useSelector((state) => state.auth.token);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -15,7 +18,7 @@ const OfferProList = () => {
           {
             headers: {
               Accept: "application/json",
-              // Add Authorization token
+              Authorization: `Bearer ${token}`,
             },
           }
         );
@@ -38,12 +41,18 @@ const OfferProList = () => {
       }
     };
 
-    fetchProducts();
-  }, []);
+    if (token) {
+      fetchProducts();
+    } else {
+      setError("Utilisateur non connecté.");
+      setLoading(false);
+    }
+  }, [token]);
 
   if (loading) {
     return <Spinner animation="border" className="d-block mx-auto mt-5" />;
   }
+
   if (error) {
     return (
       <Alert variant="danger" className="mt-5 text-center">
