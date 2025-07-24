@@ -48,8 +48,6 @@ const handleSubmit = async (e) => {
     const expiresAt = new Date(Date.now() + data.expires_in * 1000).toISOString();
     localStorage.setItem('auth', JSON.stringify({ expiresAt }));
 
-    window.dispatchEvent(new Event("authChanged"));
-
     navigate('/offres/professionnelles');
 
   } catch (err) {
