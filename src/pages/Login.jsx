@@ -29,6 +29,7 @@ const handleSubmit = async (e) => {
         Accept: 'application/json'
       },
       body: JSON.stringify(formData),
+      credentials: 'include'
     });
 
     const data = await response.json();
@@ -40,7 +41,15 @@ const handleSubmit = async (e) => {
       };
     }
 
-    console.log('Connexion réussie:', data);
+    if (!data.expires_in) {
+      throw new Error("Réponse invalide : expire_in manquant");
+    }
+
+    const expiresAt = new Date(Date.now() + data.expires_in * 1000).toISOString();
+    localStorage.setItem('auth', JSON.stringify({ expiresAt }));
+
+    window.dispatchEvent(new Event("authChanged"));
+
     navigate('/offres/professionnelles');
 
   } catch (err) {
