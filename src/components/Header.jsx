@@ -1,9 +1,11 @@
 import { Nav, Navbar, Container } from "react-bootstrap";
-import { NavLink } from "react-router";
+import { NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router";
 
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const checkAuth = () => {
@@ -17,8 +19,7 @@ const Header = () => {
     return () => {
       window.removeEventListener("authChanged", checkAuth);
     };
-  }, []);
-
+  }, [location]);
 
   return (
     <Navbar bg="light">
