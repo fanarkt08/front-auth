@@ -8,17 +8,8 @@ const Header = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const checkAuth = () => {
-      const auth = JSON.parse(localStorage.getItem("auth"));
-      setIsLoggedIn(auth && new Date(auth.expiresAt) > new Date());
-    };
-
-    checkAuth();
-    window.addEventListener("authChanged", checkAuth);
-
-    return () => {
-      window.removeEventListener("authChanged", checkAuth);
-    };
+    const auth = JSON.parse(localStorage.getItem("auth"));
+    setIsLoggedIn(auth && new Date(auth.expiresAt) > new Date());
   }, [location]);
 
   return (
