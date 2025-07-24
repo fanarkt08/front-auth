@@ -14,13 +14,15 @@ const Logout = () => {
         });
       } catch (error) {
         console.error("Erreur lors de la déconnexion :", error);
+      } finally {
+        // (2) Suppression du token côté frontend
+        localStorage.removeItem('auth');
+
+        // (3) Redirection vers la page de login
+        navigate('/connexion');
       }
 
-      // (2) Suppression du token côté frontend
-      localStorage.removeItem('auth');
 
-      // (3) Redirection vers la page de login
-      navigate('/connexion');
     };
 
     handleLogout();
